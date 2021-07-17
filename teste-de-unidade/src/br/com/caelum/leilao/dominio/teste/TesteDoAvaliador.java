@@ -4,13 +4,16 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
 import br.com.caelum.leilao.dominio.Avaliador;
 import br.com.caelum.leilao.dominio.Lance;
 import br.com.caelum.leilao.dominio.Leilao;
 import br.com.caelum.leilao.dominio.Usuario;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matcher.*;
 
 public class TesteDoAvaliador {
 
@@ -20,10 +23,12 @@ public class TesteDoAvaliador {
 	private Usuario maria;
 	private Usuario pedro;
 	private Usuario mario;
-	private Leilao leilao ;
+	private Leilao leilao;
+	private Avaliador avaliador;
 	
 	@Before
-	public void criaAvaliador() {
+	public void setUp() {
+		avaliador = new Avaliador();
 		leiloeiro = new Avaliador();
 		joao = new Usuario("João");
 		jose = new Usuario("José");
@@ -78,15 +83,16 @@ public class TesteDoAvaliador {
 
 	}
 
-	@Test
+	@Test(expected=RuntimeException.class)
 	public void testaMediaDeZeroLance() {
 
-		// acao
-		Avaliador avaliador = new Avaliador();
-		avaliador.avalia(leilao);
+		Leilao leilao = new CriadorDeLeilao().para("Fusca").constroi();
 
+		// acao		
+		avaliador.avalia(leilao);
+		
 		// validacao
-		assertEquals(0, avaliador.getMedia(), 0.0001);
+		Assert.fail();    	
 
 	}
 
@@ -155,19 +161,14 @@ public class TesteDoAvaliador {
 
 	}
 
-	@Test
+	@Test(expected=RuntimeException.class)
 	public void deveReceberListaVaziaDeLances() {
 
 		Leilao leilao = new Leilao("Fusca");
 
 		// ação		
 		leiloeiro.avalia(leilao);
-
-		// validacao
-		List<Lance> maiores = leiloeiro.getMaiores();
-
-		assertEquals(0, maiores.size());
-
+		
 	}
 
 	@Test
@@ -193,6 +194,36 @@ public class TesteDoAvaliador {
 		assertEquals(menor, leiloeiro.getMenorLance(), 0.00001);
 		assertEquals(maior, leiloeiro.getMaiorLance(), 0.00001);
 
+	}		 
+	
+	
+	@Test(expected=RuntimeException.class)
+    public void naoDeveAvaliarLeiloesSemNenhumLanceDado() {    	    	    
+		Leilao leilao = new CriadorDeLeilao().para("Fusca").constroi();
+		leiloeiro.avalia(leilao);			    		  
+    }
+	
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void deveLancarExcecaoSeOlanceForInferiorA1() {
+
+		Leilao leilao = new CriadorDeLeilao()
+				.lance(maria, 0)
+				.constroi();
+
+		// ação		
+		leiloeiro.avalia(leilao);		
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void deveLancarExcecaoSeOlanceForNegativo() {
+
+		Leilao leilao = new CriadorDeLeilao()
+				.lance(maria, -50.0)
+				.constroi();
+
+		// ação		
+		leiloeiro.avalia(leilao);		
 	}
 
 }

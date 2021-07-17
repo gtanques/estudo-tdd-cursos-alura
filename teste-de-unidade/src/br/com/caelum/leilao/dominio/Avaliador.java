@@ -13,6 +13,11 @@ public class Avaliador {
     private List<Lance> maiores = new ArrayList<Lance>();
 
     public void avalia(Leilao leilao){
+    	
+    	if(leilao.getLances().size() == 0) {
+    		throw new RuntimeException("Leilão sem lances");
+    	}
+    	
     	Double total = 0.0;    	
         for(Lance lance : leilao.getLances()){
             if(lance.getValor() > maiorDeTodos) maiorDeTodos = lance.getValor();
